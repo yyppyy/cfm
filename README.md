@@ -47,7 +47,7 @@ Always use the following command to run the evaluation.
 
     ./benchmark.py test_program 1
 
-## parameters
+## Parameters
 All parameters in our test program are defined as members of class `Testprogram` under `lib/workloads.py`.
 * cfm_dir: the location of your local repo
 * trace_dir: the location of trace files
@@ -55,5 +55,5 @@ All parameters in our test program are defined as members of class `Testprogram`
 * loc_mem: local memory size in MB
 * app: application to replay, currently including `tf(tensorflow)`, `gc(graphchi)`, `ma(memcached+YCSB workload a)` and `mc(memcached+YCSB workload c)` 
 
-## parameters
-2 files recording overall running time and memory access latency cdf under `./test_program/`
+## Results
+the test program will generate two files that record overall running time and memory access latency cdf respectively under `./test_program/`
