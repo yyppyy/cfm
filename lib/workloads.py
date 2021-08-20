@@ -434,34 +434,40 @@ class Memtrace(Workload):
 
 class Testprogram(Workload):
 
-	#chang these when running new workload
-	num_threads = 10
+	#constant
+	wname = 'test_program'
+	binary_name = 'test_program_fastswap'
+	coeff = [-1984.129, 4548.033, -3588.554, 1048.644, 252.997]
+	apps = ['tf', 'gc', 'ma', 'mc']
 	num_logs_once = 500000
-	loc_mem = 512
-	app = 'graphchi'
 	cpuoff = 0
 
-	wname = 'test_program'
+	#chang these when running new workload
+	cfm_dir = '~/artifact_eval/cfm/'
+	trace_dir = '~/artifact_eval/cfm/test_program/'
+	num_threads = 10
+	loc_mem = 512
+	app = apps[0]
+
+	#calculated accordingly
 	ideal_mem = loc_mem + num_threads * 15 * num_logs_once / 1024 / 1024
 	min_ratio = 0.9
 	min_mem = int(min_ratio * ideal_mem)
-	binary_name = 'test_program_fastswap'
 	cpu_req = num_threads + 1
-	coeff = [-1984.129, 4548.033, -3588.554, 1048.644, 252.997]
 
 	def get_cmdline(self, procs_path, pinned_cpus):
-		prefix = "../test_program/compile.sh && echo $$ > {} &&".format(procs_path)
+		prefix = "./test_program/compile.sh && echo $$ > {} &&".format(procs_path)
 		pinned_cpus_string = ','.join(map(str, [_ + self.cpuoff for _ in pinned_cpus]))
 		#set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
 		set_cpu = ''
-		test_dir = '/root/yanpeng/cfm/test_program/'
-		log_prefix = ''.join((test_dir, self.app, '/partitioned/', self.app))
+		test_dir = self.cfm_dir + 'test_program/'
+		log_prefix = ''.join((self.trace_dir, self.app, '/'))
 		progress_file = ''.join((test_dir, self.app, '_latency_progress', str(self.num_threads)))
 		latency_file = ''.join((test_dir, self.app, '_latency_cdf', str(self.num_threads)))
 		test_vars = ' '.join(('1', '0', str(self.num_threads), progress_file, latency_file))
 		for i in range(self.num_threads):
-			test_vars += (''.join((' ', log_prefix, '_', str(i), '_0')))
-		shell_cmd = '/usr/bin/time -v ' + ''.join((test_dir, 'test_program_fastswap ', test_vars))
+			test_vars += (''.join((' ', log_prefix, str(i))))
+		shell_cmd = '/usr/bin/time -v ' + ''.join((test_dir, self.binary_name, ' ', test_vars))
 		#file_cmd = '> pro.txt'
 		file_cmd = ''
 		full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd, file_cmd))
