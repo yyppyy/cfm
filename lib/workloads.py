@@ -62,6 +62,7 @@ class Workload:
         self.popen = subprocess.Popen(self.cmdline, stdout=subprocess.PIPE,
                                       stderr=subprocess.PIPE, shell=True)
         self.stdout, self.stderr = self.popen.communicate()  # blocks process exit
+        print(self.popen.returncode)
         assert(self.popen.returncode == 0)
         self.ts_finish = time.time()
 
@@ -142,7 +143,8 @@ class Workload:
 
 class Quicksort(Workload):
     wname = "quicksort"
-    ideal_mem = 8250
+    #ideal_mem = 8250
+    ideal_mem = 32
     min_ratio = 0.65
     min_mem = int(min_ratio * ideal_mem)
     binary_name = "quicksort"
@@ -151,7 +153,7 @@ class Quicksort(Workload):
 
     def get_cmdline(self, procs_path, pinned_cpus):
         prefix = "echo $$ > {} &&".format(procs_path)
-        arg = '8192'
+        arg = '1024'
         shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/quicksort/quicksort {}'.format(arg)
         pinned_cpus_string = ','.join(map(str, pinned_cpus))
         set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
@@ -412,6 +414,59 @@ class Stream(Workload):
         full_command = ' '.join((cd_dir, prefix, 'exec', set_cpu, shell_cmd))
         return full_command
 
+class Memtrace(Workload):
+    wname = "memtrace"
+    ideal_mem = 1
+    min_ratio = 0.65
+    min_mem = int(min_ratio * ideal_mem)
+    binary_name = "memtrace"
+    cpu_req = 1
+    coeff = [-1984.129, 4548.033, -3588.554, 1048.644, 252.997]
+
+    def get_cmdline(self, procs_path, pinned_cpus):
+        prefix = "echo $$ > {} &&".format(procs_path)
+        arg = constants.WORK_DIR + '/memtrace/trace/multiPage_align1024_tid0_r2w0.5 ' + constants.WORK_DIR + '/memtrace/res/res0.txt 1 1'
+        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/memtrace/bin/memtrace {}'.format(arg)
+        pinned_cpus_string = ','.join(map(str, pinned_cpus))
+        set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
+        full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
+        return full_command
+
+class Testprogram(Workload):
+
+	#chang these when running new workload
+	num_threads = 10
+	num_logs_once = 500000
+	loc_mem = 512
+	app = 'graphchi'
+	cpuoff = 0
+
+	wname = 'test_program'
+	ideal_mem = loc_mem + num_threads * 15 * num_logs_once / 1024 / 1024
+	min_ratio = 0.9
+	min_mem = int(min_ratio * ideal_mem)
+	binary_name = 'test_program_fastswap'
+	cpu_req = num_threads + 1
+	coeff = [-1984.129, 4548.033, -3588.554, 1048.644, 252.997]
+
+	def get_cmdline(self, procs_path, pinned_cpus):
+		prefix = "../test_program/compile.sh && echo $$ > {} &&".format(procs_path)
+		pinned_cpus_string = ','.join(map(str, [_ + self.cpuoff for _ in pinned_cpus]))
+		#set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
+		set_cpu = ''
+		test_dir = '/root/yanpeng/cfm/test_program/'
+		log_prefix = ''.join((test_dir, self.app, '/partitioned/', self.app))
+		progress_file = ''.join((test_dir, self.app, '_latency_progress', str(self.num_threads)))
+		latency_file = ''.join((test_dir, self.app, '_latency_cdf', str(self.num_threads)))
+		test_vars = ' '.join(('1', '0', str(self.num_threads), progress_file, latency_file))
+		for i in range(self.num_threads):
+			test_vars += (''.join((' ', log_prefix, '_', str(i), '_0')))
+		shell_cmd = '/usr/bin/time -v ' + ''.join((test_dir, 'test_program_fastswap ', test_vars))
+		#file_cmd = '> pro.txt'
+		file_cmd = ''
+		full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd, file_cmd))
+		return full_command
+
 def get_workload_class(wname):
     return {'quicksort': Quicksort,
             'linpack': Linpack,
@@ -420,4 +475,5 @@ def get_workload_class(wname):
             'spark': Spark,
             'kmeans': Kmeans,
             'memaslap': Memaslap,
-            'stream': Stream}[wname]
+            'stream': Stream,
+            'memtrace': Memtrace, 'test_program': Testprogram}[wname]

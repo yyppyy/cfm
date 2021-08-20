@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/root/miniconda3/envs/py37/bin/python
 import argparse
 from lib import workloads
 from lib import utils
@@ -40,7 +40,7 @@ def main():
     # Parse Command Line Arguments
     workload_choices = ['quicksort', 'linpack', 'tf-inception',
                         'tf-resnet', 'spark', 'kmeans', 'memaslap',
-                        'stream']
+                        'stream', 'memtrace', 'test_program']
 
     parser = argparse.ArgumentParser(description='Run a workload in a '
                                      'parameterized container')
