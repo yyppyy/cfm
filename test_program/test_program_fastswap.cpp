@@ -637,20 +637,26 @@ int main(int argc, char **argv)
 
 		pthread_t thread[MAX_NUM_THREAD];
 
-		fprintf(progress, "Pass[%lu] Node[%d]: ", pass, node_id);
+//		fprintf(progress, "Pass[%lu] Node[%d]: ", pass, node_id);
 
 		unsigned long longest_time = 0;
 		for (int i = 0; i < num_threads; ++i) {
-			longest_time = max(longest_time, args[i].dt);
+			longest_time = max(longest_time, args[i].time);
 		}
 		tot_run_time += longest_time;
 
-		fprintf(progress, "%lu", tot_run_time);
-		for (int i = 0; i < num_threads; ++i) {
-			fprintf(progress, " %lu", args[i].time);
+//		fprintf(progress, "%lu", tot_run_time);
+		//for (int i = 0; i < num_threads; ++i) {
+		//	fprintf(progress, " %lu", args[i].time);
+		//}
+//		fprintf(progress, "\n");
+		if (pass % 1000 == 0) {
+			fprintf(progress, "Pass[%lu] Node[0] || Time [%lu] ||  ", pass, longest_time);
+			for (int i = 0; i < num_threads; ++i)
+				fprintf(progress, "%lu,  ", args[i].time);
+			fprintf(progress, "in us\n");
+			fflush(progress);		
 		}
-		fprintf(progress, "\n");
-		fflush(progress);		
 
 		for (int i = 0; i < num_threads; ++i) {
 			//printf("Thread[%d]: loading log...\n", i);
