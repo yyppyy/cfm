@@ -445,7 +445,7 @@ class Testprogram(Workload):
 	#chang these when running new workload
 	cfm_dir = '~/artifact_eval/cfm/'
 	trace_dir = '~/artifact_eval/cfm/test_program/'
-	num_threads = 10
+	num_threads = 1
 	loc_mem = 512
 	app = apps[2]
 
