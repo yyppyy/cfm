@@ -462,8 +462,8 @@ class Testprogram(Workload):
 		set_cpu = ''
 		test_dir = self.cfm_dir + 'test_program/'
 		log_prefix = ''.join((self.trace_dir, self.app, '/', 'memcached_a_'))
-		progress_file = ''.join((test_dir, self.app, '_latency_progress', str(self.num_threads)))
-		latency_file = ''.join((test_dir, self.app, '_latency_cdf', str(self.num_threads)))
+		progress_file = ''.join((test_dir, 'log/', self.app, '_latency_progress', str(self.num_threads)))
+		latency_file = ''.join((test_dir, 'log/', self.app, '_latency_cdf', str(self.num_threads)))
 		test_vars = ' '.join(('1', '0', str(self.num_threads), progress_file, latency_file))
 		for i in range(self.num_threads):
 			test_vars += (''.join((' ', log_prefix, str(i), '_0')))
