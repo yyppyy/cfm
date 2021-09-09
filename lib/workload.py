@@ -11,19 +11,6 @@ from lib import utils
 from lib.container import Container
 from lib import constants
 
-app = ''
-num_threads = 0
-steps = 0
-def set_app(_app):
-	global app
-	app = _app
-def set_threads(_num_threads):
-	global num_threads
-	num_threads = int(_num_threads)
-def set_steps(_steps):
-	global steps
-	steps = int(_steps)
-
 class Workload:
     ''' This class is not meant to be used by itself. It's only purpose
         is to provide definitions that are common to all of its children.
@@ -448,23 +435,19 @@ class Memtrace(Workload):
 class Testprogram(Workload):
 
 	#constant
-
-	global app
-	global num_threads
-	global steps
 	wname = 'test_program'
 	binary_name = 'test_program_fastswap'
 	coeff = [-1984.129, 4548.033, -3588.554, 1048.644, 252.997]
-	#apps = ['tf', 'gc', 'ma', 'mc']
+	apps = ['tf', 'gc', 'ma', 'mc']
 	num_logs_once = 500000
 	cpuoff = 0
 
 	#chang these when running new workload
 	cfm_dir = '~/artifact_eval/cfm/'
 	trace_dir = '~/artifact_eval/cfm/test_program/'
-	#num_threads = 10
+	num_threads = 10
 	loc_mem = 512
-	#app = apps[1]
+	app = apps[1]
 
 	#calculated accordingly
 	ideal_mem = loc_mem + num_threads * 15 * num_logs_once / 1024 / 1024
@@ -473,25 +456,17 @@ class Testprogram(Workload):
 	cpu_req = num_threads + 1
 
 	def get_cmdline(self, procs_path, pinned_cpus):
-		global app
-		global num_threads
-		global steps
-		prefix = "echo $$ > {} &&".format(procs_path)
+		prefix = "./test_program/compile.sh && echo $$ > {} &&".format(procs_path)
 		pinned_cpus_string = ','.join(map(str, [_ + self.cpuoff for _ in pinned_cpus]))
 		#set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
 		set_cpu = ''
 		test_dir = self.cfm_dir + 'test_program/'
-		if app == 'ma':
-			log_prefix = ''.join((self.trace_dir, app, '/', 'memcached_a_'))
-			log_postfix = '_0'
-		else:
-			log_prefix = ''.join((self.trace_dir, app, '/'))
-			log_postfix = ''
-		progress_file = ''.join((test_dir, 'log/progress.txt'))
-		latency_file = ''.join((test_dir, 'log/', app, '_latency_cdf', str(num_threads)))
-		test_vars = ' '.join(('1', '0', str(num_threads), progress_file, latency_file, str(steps)))
-		for i in range(num_threads):
-			test_vars += (''.join((' ', log_prefix, str(i), log_postfix)))
+		log_prefix = ''.join((self.trace_dir, self.app, '/', 'memcached_a_'))
+		progress_file = ''.join((test_dir, 'log/', self.app, '_latency_progress', str(self.num_threads)))
+		latency_file = ''.join((test_dir, 'log/', self.app, '_latency_cdf', str(self.num_threads)))
+		test_vars = ' '.join(('1', '0', str(self.num_threads), progress_file, latency_file))
+		for i in range(self.num_threads):
+			test_vars += (''.join((' ', log_prefix, str(i), '_0')))
 		shell_cmd = '/usr/bin/time -v ' + ''.join((test_dir, self.binary_name, ' ', test_vars))
 		#file_cmd = '> pro.txt'
 		file_cmd = ''

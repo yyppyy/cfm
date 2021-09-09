@@ -49,15 +49,12 @@ def main():
     parser.add_argument('ratio',
                         help="Ratio of the workload's max memory to use",
                         type=utils.check_ratio)
-    parser.add_argument('app', help="app")
-    parser.add_argument('num_threads', help="number of threads")
-    parser.add_argument('steps', help="steps")
     parser.add_argument('--id', default=0,
                         help="Workload id used for container name")
     parser.add_argument('--cpus', default=[],type=lambda l:list(map(int, l.split(','))),
                         help="List of cpus to use for workloads that support it")
 
-    args = parser.parse_args();workloads.set_app(args.app);workloads.set_threads(args.num_threads);workloads.set_steps(args.steps)
+    args = parser.parse_args()
     run_benchmark(args)
 
 

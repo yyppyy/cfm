@@ -128,6 +128,7 @@ struct metadata_t {
 int num_nodes;
 int node_id = -1;
 int num_threads;
+unsigned long max_steps;
 string progress_file_name;
 string latency_file_name;
 
@@ -529,7 +530,8 @@ enum
 	arg_num_threads = 3,
 	arg_progress_file = 4,
 	arg_latency_file = 5,
-	arg_log1 = 6,
+	arg_steps = 6,
+	arg_log1 = 7,
 };
 
 int main(int argc, char **argv)
@@ -548,6 +550,7 @@ int main(int argc, char **argv)
 	num_threads = atoi(argv[arg_num_threads]);
 	progress_file_name = string(argv[arg_progress_file]);
 	latency_file_name = string(argv[arg_latency_file]);
+	max_steps = atoi(argv[arg_steps]);
 	//printf("Num Nodes: %d, Num Threads: %d\n", num_nodes, num_threads);
 	if (argc != arg_log1 + num_threads) {
 		fprintf(stderr, "thread number and log files provided not match\n");
@@ -629,7 +632,7 @@ int main(int argc, char **argv)
 	unsigned long pass = 0;
 	unsigned long ts_limit = start_ts;
 	unsigned long tot_run_time = 0;
-	while (pass < 1500000) {
+	while (pass <= max_steps) {
 		ts_limit += TIMEWINDOW_US;
 
 		pthread_t thread[MAX_NUM_THREAD];
